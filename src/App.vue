@@ -1,5 +1,7 @@
 <script lang="js" setup>
 import { getDiameterRanges } from './utils'
+import { useToast } from './components/useToast'
+import Papa from 'papaparse'
 
 defineOptions({ name: '' })
 /**原始数据 */
@@ -20,18 +22,51 @@ const handleData = () => {
   const res = calculateDiameterRange(csvData, diameterRanges, area);//result为径阶整化结果
 }
 
-const importCsv = async () => {
+const fileLoad = async (event) => {
+  const file = event.target.files[0];
+      if (file && file.type === 'text/csv') {
+        const reader = new FileReader();
 
+        reader.onload = function(e) {
+          const arrayBuffer = e.target.result;
+          const decoder = new TextDecoder('utf-8');
+          const csvContent = decoder.decode(arrayBuffer);
+
+          Papa.parse(csvContent, {
+            complete: function(result) {
+              useToast().success("文件解析成功!");
+              originData = result.data;
+              console.log("数据内容:", originData);
+            },
+            error: function(error) {
+              useToast().error("文件解析失败!");
+              console.error("解析错误:", error);
+            }
+          });
+        };
+
+        // 读取文件为 ArrayBuffer
+        reader.readAsArrayBuffer(file);
+      } else {
+        useToast().warning("请选择一个有效的 CSV 文件!");
+      }
 }
 </script>
 
 <template>
   <div class="flex flex-col h-screen">
+    <div class="toast toast-center toast-top" id="toast-root"></div>
     <div class="h-16 w-full flex items-center justify-between p-4 bg-base-300">
-      <button class="btn btn-ghost" @click="importCsv">导入 CSV</button>
+      <input
+        type="file"
+        class="file-input file-input-ghost"
+        id="fileInput"
+        accept=".csv"
+        @change="fileLoad"
+      />
       <div class="flex flex-row gap-4">
         <button
-          class="btn"
+          class="btn btn-ghost"
           popovertarget="popover-2"
           style="anchor-name: --anchor-2"
         >
@@ -91,7 +126,7 @@ const importCsv = async () => {
           </li>
         </ul>
         <button
-          class="btn"
+          class="btn btn-ghost"
           popovertarget="popover-1"
           style="anchor-name: --anchor-1"
         >
@@ -108,9 +143,7 @@ const importCsv = async () => {
         </ul>
       </div>
     </div>
-    <div
-      class="p-4 my-6 h-16 bg-base-200 flex items-center justify-start gap-4"
-    >
+    <div class="p-4 h-16 bg-base-100 flex items-center justify-start gap-4">
       <input type="number" class="input" placeholder="在此输入面积" />
       <input type="number" class="input" placeholder="在此输入坡度" />
       <label class="input">
@@ -123,10 +156,25 @@ const importCsv = async () => {
       </label>
       <button class="btn btn-ghost">预测 5 年</button>
       <button class="btn btn-ghost">砍伐</button>
+      <button class="btn btn-ghost">清除</button>
     </div>
-    <div class="bg-base-200 flex-1"></div>
+    <div class="bg-base-100 px-4">
+      <div class="card w-full bg-base-100 card-xs shadow-sm">
+        <div class="card-body">
+          <div class="h-12 flex items-center justify-start gap-4">
+            <div class="text-sm font-bold">当前参数：</div>
+            <div class="flex gap-2">
+              <kbd class="kbd kbd-md">B:</kbd>
+              <kbd class="kbd kbd-md">D:</kbd>
+              <kbd class="kbd kbd-md">Q:</kbd>
+              <kbd class="kbd kbd-md">地区:</kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <dialog id="param_modal" class="modal">
-      <div class="modal-box">
+      <div class="modal-box w-11/12 max-w-5xl">
         <form method="dialog">
           <button
             class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
@@ -135,7 +183,11 @@ const importCsv = async () => {
           </button>
         </form>
         <h3 class="text-lg font-bold">参数修改</h3>
-        <p class="py-4">Press ESC key or click on ✕ button to close</p>
+        <div class="flex flex-row gap-4">
+          <input type="number" class="input" placeholder="B" />
+          <input type="number" class="input" placeholder="D" />
+          <input type="number" class="input" placeholder="Q" />
+        </div>
       </div>
     </dialog>
   </div>
