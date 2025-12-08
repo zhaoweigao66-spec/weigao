@@ -30,6 +30,8 @@ const props = defineProps({
     }
 })
 
+let instance = null
+
 const canvasDom = ref(null);
 onMounted(() => {
     initChart(props.data);
@@ -65,10 +67,10 @@ const initChart = (data) => {
     }
 
     // 创建新的图表
-    new Chart(canvasDom.value.getContext('2d'), {
+    instance = new Chart(canvasDom.value.getContext('2d'), {
         type: "bar",
         data: {
-            labels: diameterClasses,//.filter(diameter => data.some(item => item["径阶"] === diameter && item["株数"] > 0)),
+            labels: diameterClasses,
             datasets: [
                 // 堆积柱状图的数据集
                 ...datasets,
@@ -172,8 +174,14 @@ function getTitle() {
     } else if (props.type === 'predict') {
         return `（预测${props.year}年）`;
     } else {
-        return '';
+        return `（砍伐一次）`;
     }
+}
+
+const isShowCurve = ref(false)
+const handleChange = (e) => {
+    isShowCurve.value = e.target.value
+    
 }
 </script>
 
@@ -183,7 +191,7 @@ function getTitle() {
         <canvas :id="props.id" ref="canvasDom" style="width: 450px; height: 300px;"></canvas>
     </div>
     <div class="flex gap-2 items-center">
-        <input type="checkbox" class="toggle toggle-success toggle-sm" />
+        <input type="checkbox" class="toggle toggle-success toggle-sm" v-model="isShowCurve" @change="handleChange" />
         <span class="">显示均衡曲线</span>
     </div>
 </div>
