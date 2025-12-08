@@ -235,6 +235,24 @@ const clearData = () => {
   document.getElementById('fileInput').value = '';
   useToast().success("数据已清空！");
 };
+
+// 打开表格弹窗
+const openTableModal = (data) => {
+  console.log('data :>> ', data);
+  const tableBody = document.getElementById('table_body');
+  tableBody.innerHTML = ''; // 清空之前的内容
+  data.forEach(row => {
+    const tr = document.createElement('tr');
+    for (const key in row) {
+      const td = document.createElement('td');
+      td.textContent = row[key];
+      tr.appendChild(td);
+    }
+    tableBody.appendChild(tr);
+  });
+  const tableModal = document.getElementById('table_modal');
+  tableModal.showModal();
+};
 </script>
 
 <template>
@@ -318,15 +336,19 @@ const clearData = () => {
           </li>
           <li>
             <input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-ghost justify-start"
-              aria-label="Dark" value="dark" />
-          </li>
-          <li>
-            <input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-ghost justify-start"
-              aria-label="Fantasy" value="fantasy" />
+              aria-label="Valentine" value="valentine" />
           </li>
           <li>
             <input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-ghost justify-start"
               aria-label="Luxury" value="luxury" />
+          </li>
+          <li>
+            <input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-ghost justify-start"
+              aria-label="Forest" value="forest" />
+          </li>
+          <li>
+            <input type="radio" name="theme-dropdown" class="theme-controller btn btn-sm btn-ghost justify-start"
+              aria-label="Dim" value="dim" />
           </li>
         </ul>
       </div>
@@ -369,7 +391,7 @@ const clearData = () => {
         <div style="width: 1600px;" class="flex flex-row gap-12 flex-wrap">
           <template v-for="(value, index) in resultList" :key="index">
             <chartCom :type="value.type" :id="'chart-' + value.year" :data="value.data" :bdq="bdqParams"
-              :year="value.year" />
+              :year="value.year" @open-table-modal="openTableModal" />
           </template>
         </div>
       </div>
@@ -399,7 +421,8 @@ const clearData = () => {
           <option v-for="species in allTreeSpecies" :key="species" :value="species">{{ species }}</option>
         </select>
         <div>采伐树种优先级：</div>
-        <MultiSelect :options="allTreeSpecies.map(species => ({ label: species, value: species }))" v-model="cutSelectedSpecies" />
+        <MultiSelect :options="allTreeSpecies.map(species => ({ label: species, value: species }))"
+          v-model="cutSelectedSpecies" />
       </div>
       <div class="divider"></div>
       <div class="flex gap-8">
@@ -432,6 +455,30 @@ const clearData = () => {
           </div>
         </li>
       </ul>
+    </div>
+  </dialog>
+  <dialog id="table_modal" class="modal">
+    <div class="modal-box w-11/12 max-w-5xl">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
+          ✕
+        </button>
+      </form>
+      <h3 class="text-lg font-bold mb-8">数据表格</h3>
+      <div class="max-h-100 overflow-y-auto">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>树种</th>
+              <th>径阶</th>
+              <th>株数</th>
+            </tr>
+          </thead>
+          <tbody id="table_body" class="">
+            <!-- 表格内容将动态生成 -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </dialog>
 </div>

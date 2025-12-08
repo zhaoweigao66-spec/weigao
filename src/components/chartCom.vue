@@ -3,6 +3,7 @@ import { defineOptions, defineProps, onMounted, ref } from 'vue'
 import {
     Chart
 } from 'chart.js/auto';
+import { useToast } from './useToast';
 
 
 defineOptions({ name: 'ChartCom' })
@@ -30,6 +31,8 @@ const props = defineProps({
     }
 })
 
+const emit = defineEmits(['openTableModal'])
+
 let instance = null
 
 const canvasDom = ref(null);
@@ -47,24 +50,25 @@ const initChart = (data) => {
         type: "bar",
         data: {
             labels: diameterClasses,
-            datasets: [
-                // 堆积柱状图的数据集
-                ...datasets,
-                // 均衡曲线的数据集
-                {
-                    label: "均衡曲线",
-                    data: curveDataPoints,
-                    borderColor: "rgba(75, 192, 192, 1)",
-                    borderWidth: 3,
-                    fill: false,  // 使曲线不填充
-                    type: "line",  // 均衡曲线使用线图
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    pointBackgroundColor: "rgba(75, 192, 192, 1)",
-                    pointBorderColor: "#fff",
-                }
-            ]
+            datasets
+            // datasets: [
+            //     // 堆积柱状图的数据集
+            //     ...datasets,
+            //     // 均衡曲线的数据集
+            //     {
+            //         label: "均衡曲线",
+            //         data: curveDataPoints,
+            //         borderColor: "rgba(75, 192, 192, 1)",
+            //         borderWidth: 3,
+            //         fill: false,  // 使曲线不填充
+            //         type: "line",  // 均衡曲线使用线图
+            //         tension: 0.4,
+            //         pointRadius: 5,
+            //         pointHoverRadius: 7,
+            //         pointBackgroundColor: "rgba(75, 192, 192, 1)",
+            //         pointBorderColor: "#fff",
+            //     }
+            // ]
         },
         options: {
             responsive: true,
@@ -156,11 +160,15 @@ function getTitle() {
 
 const isShowCurve = ref(false)
 const handleChange = (e) => {
-    isShowCurve.value = e.target.value
+    if (!props.bdq.B) {
+        isShowCurve.value = false
+        useToast().error('请先选择 B,D,Q 之后再显示均衡曲线！');
+        return;
+    }
 
     const { datasets, treeSpecies, diameterClasses } = getDatasets(props.data)
 
-    if (isShowCurve.value) {
+    if (!isShowCurve.value) {
         instance.data.datasets = datasets
     } else {
         const curveDataPoints = getCurveDataPoints()
@@ -217,23 +225,29 @@ const getCurveDataPoints = () => {
     }
     return curveDataPoints
 }
+
+const seeData = () => {
+    emit('openTableModal', props.data)
+}
 </script>
 
 <template>
-    <div style="height: 350px; width: 500px;" class="flex flex-col items-center justify-between border-2 pb-4">
-        <div style="width: 450px; height: 300px;">
-            <canvas :id="props.id" ref="canvasDom" style="width: 450px; height: 300px;"></canvas>
-        </div>
-        <div class="flex flex-row justify-between">
-            <div class="flex gap-2 items-center">
-                <input type="checkbox" class="toggle toggle-success toggle-sm" :value="isShowCurve"
-                    @change="handleChange" />
-                <span class="">显示均衡曲线</span>
-            </div>
-            <!-- <button class="">查看数据</button> -->
-        </div>
-
+<div style="height: 350px; width: 500px;" class="flex flex-col items-center justify-between border-2 pb-4">
+    <div style="width: 450px; height: 300px;">
+        <canvas :id="props.id" ref="canvasDom" style="width: 450px; height: 300px;"></canvas>
     </div>
+
+    <div class="flex flex-row gap-12">
+        <div class="flex gap-2 items-center">
+            <input type="checkbox" class="toggle toggle-primary toggle-sm" v-model="isShowCurve"
+                @change="handleChange" />
+            <span class="">显示均衡曲线</span>
+        </div>
+        <button class="btn btn-xs btn-primary" @click="seeData">查看数据</button>
+    </div>
+
+
+</div>
 </template>
 
 <style scoped></style>
