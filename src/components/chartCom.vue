@@ -45,14 +45,7 @@ onMounted(() => {
 });
 
 const initChart = (data) => {
-    const newData = data.map(item => {
-        return {
-            ...item,
-            "株数": (item["株数"] / props.area) * 10000  // 转换为株数/公顷
-        }
-    })
-    const { datasets, treeSpecies, diameterClasses } = getDatasets(newData)
-
+    const { datasets, treeSpecies, diameterClasses } = getDatasets(data)
     const curveDataPoints = getCurveDataPoints()
 
     // 创建新的图表
@@ -61,24 +54,6 @@ const initChart = (data) => {
         data: {
             labels: diameterClasses,
             datasets
-            // datasets: [
-            //     // 堆积柱状图的数据集
-            //     ...datasets,
-            //     // 均衡曲线的数据集
-            //     {
-            //         label: "均衡曲线",
-            //         data: curveDataPoints,
-            //         borderColor: "rgba(75, 192, 192, 1)",
-            //         borderWidth: 3,
-            //         fill: false,  // 使曲线不填充
-            //         type: "line",  // 均衡曲线使用线图
-            //         tension: 0.4,
-            //         pointRadius: 5,
-            //         pointHoverRadius: 7,
-            //         pointBackgroundColor: "rgba(75, 192, 192, 1)",
-            //         pointBorderColor: "#fff",
-            //     }
-            // ]
         },
         options: {
             responsive: true,
@@ -202,7 +177,13 @@ const handleChange = (e) => {
     instance.update()
 }
 
-const getDatasets = (data) => {
+const getDatasets = (originData) => {
+    const data = originData.map(item => {
+        return {
+            ...item,
+            "株数": Math.round((item["株数"] / props.area) * 10000)  // 转换为株数/公顷
+        }
+    })
     // 处理堆积柱状图的数据
     let treeSpecies = [...new Set(data.map((item) => item["树种"]))];
     let diameterClasses = [...new Set(data.map((item) => item["径阶"]))].sort((a, b) => a - b);
@@ -219,7 +200,6 @@ const getDatasets = (data) => {
             backgroundColor: getRandomColor(),
         };
     });
-    console.log('datasets :>> ', datasets);
     return { datasets, treeSpecies, diameterClasses }
 }
 
@@ -243,22 +223,22 @@ const seeData = () => {
 </script>
 
 <template>
-<div style="height: 350px; width: 500px;" class="flex flex-col items-center justify-between border-2 pb-4">
-    <div style="width: 450px; height: 300px;">
-        <canvas :id="props.id" ref="canvasDom" style="width: 450px; height: 300px;"></canvas>
-    </div>
-
-    <div class="flex flex-row gap-12">
-        <div class="flex gap-2 items-center">
-            <input type="checkbox" class="toggle toggle-primary toggle-sm" v-model="isShowCurve"
-                @change="handleChange" />
-            <span class="">显示均衡曲线</span>
+    <div style="height: 350px; width: 500px;" class="flex flex-col items-center justify-between border-2 pb-4">
+        <div style="width: 450px; height: 300px;">
+            <canvas :id="props.id" ref="canvasDom" style="width: 450px; height: 300px;"></canvas>
         </div>
-        <button class="btn btn-xs btn-primary" @click="seeData">查看数据</button>
+
+        <div class="flex flex-row gap-12">
+            <div class="flex gap-2 items-center">
+                <input type="checkbox" class="toggle toggle-primary toggle-sm" v-model="isShowCurve"
+                    @change="handleChange" />
+                <span class="">显示均衡曲线</span>
+            </div>
+            <button class="btn btn-xs btn-primary" @click="seeData">查看数据</button>
+        </div>
+
+
     </div>
-
-
-</div>
 </template>
 
 <style scoped></style>
