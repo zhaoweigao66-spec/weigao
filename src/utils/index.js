@@ -355,13 +355,13 @@ function calculateGrowth(
   let result =
     Math.exp(
       r1 +
-        r2dbh * diameterClass +
-        r3SL * slope +
-        r4h1 * speciesDiversity +
-        r5h2 * diameterDiversity +
-        r6MAT * mat +
-        r7MAP * map +
-        r8B * totalBasalArea
+      r2dbh * diameterClass +
+      r3SL * slope +
+      r4h1 * speciesDiversity +
+      r5h2 * diameterDiversity +
+      r6MAT * mat +
+      r7MAP * map +
+      r8B * totalBasalArea
     ) - 1;
   return Math.max(result, 0);
 }
@@ -422,7 +422,7 @@ function calculateRecruitment(
 
   return Math.max(
     pnorm(result / Math.exp(ze)) * result +
-      Math.exp(ze) * dnorm(result / Math.exp(ze)),
+    Math.exp(ze) * dnorm(result / Math.exp(ze)),
     0
   );
 }
@@ -550,24 +550,24 @@ function findDiameterClass(D, diameterList) {
 }
 
 
-export function calculateCurveData(B,D,q){
-    let k2 = Math.PI / 40000;
+export function calculateCurveData(B, D, q) {
+  let k2 = Math.PI / 40000;
 
-    let h = 5;
-    let result =0;
-    let currentValue = 7.5;
-    let power = D / 5;
+  let h = 5;
+  let result = 0;
+  let currentValue = 7.5;
+  let power = D / 5;
 
-    while (currentValue <= D + h/2){
-        result += currentValue ** 2 * Math.pow(q,power-1)
-        power -= 1;
-        currentValue += 5;
-    }
+  while (currentValue <= D + h / 2) {
+    result += currentValue ** 2 * Math.pow(q, power - 1)
+    power -= 1;
+    currentValue += 5;
+  }
 
-    let k3 = k2 * result;
-    let N1 = B / k3;
-    
-    return N1;
+  let k3 = k2 * result;
+  let N1 = B / k3;
+
+  return N1;
 }
 
 export function exportResultsToCSV(results, resultNames, csvName) {
@@ -613,10 +613,8 @@ export function exportResultsToCSV(results, resultNames, csvName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = csvName+".csv";
+  a.download = csvName + ".csv";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
-  console.log("✅ CSV 导出完成！");
 }

@@ -71,6 +71,9 @@ const initChart = (data) => {
                     grid: {
                         drawBorder: true,
                         color: "rgba(200, 200, 200, 0.3)",
+                    },
+                    ticks: {
+                        stepSize: 5
                     }
                 },
                 y: {
@@ -178,12 +181,13 @@ const handleChange = (e) => {
 }
 
 const getDatasets = (originData) => {
-    const data = originData.map(item => {
+    let data = originData.map(item => {
         return {
             ...item,
-            "株数": Math.round((item["株数"] / props.area) * 10000)  // 转换为株数/公顷
+            "株数": Math.round((item["株数"] / props.area) * 10000),  // 转换为株数/公顷
+            "径阶": `${+item["径阶"] - 2.5}`
         }
-    })
+    }).filter(v => v["株数"] !== 0)
     // 处理堆积柱状图的数据
     let treeSpecies = [...new Set(data.map((item) => item["树种"]))];
     let diameterClasses = [...new Set(data.map((item) => item["径阶"]))].sort((a, b) => a - b);
