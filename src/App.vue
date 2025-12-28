@@ -81,7 +81,7 @@ const fileLoad = async (event) => {
         },
         error: function (error) {
           useToast().error("文件解析失败!");
-          console.error("解析错误:", error);
+          // console.error("解析错误:", error);
         }
       });
     };
